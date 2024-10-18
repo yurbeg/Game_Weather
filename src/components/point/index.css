@@ -1,15 +1,33 @@
 .point_container{
     margin-top: 15px;
     width: 200px;
-    height: 200px;
     border: 1px solid black;
     text-align: center;
+    border-radius: 15px;
+    padding: 20px;
+}
+@keyframes wrongAnswer {
+    0%   {background-color: rgb(255, 150, 150);}
+    25%  {background-color: rgb(245, 81, 81);}
+    50%  {background-color: rgb(255, 29, 29);}
+    100% {background-color: #ff0000;}
 }
 .red{
     color:white;
-    background-color: red;
+    background-color: #ff0000;
+    animation-name: wrongAnswer;
+    animation-duration: 1s;
+
+}
+@keyframes rightAnswer {
+    0%   {background-color: rgb(100, 155, 100);}
+    25%  {background-color: rgb(105, 189, 79);}
+    50%  {background-color: rgb(49, 183, 53);}
+    100% {background-color: #0d7000;}
 }
 .green{
     color:white;
-    background-color:green;
+    background-color:#0d7000;
+    animation-name: rightAnswer;
+    animation-duration: 1s;
 }

@@ -8,7 +8,9 @@ const Main = () => {
   const [ randCitis,setRandCitis ] = useState([])
   const [ isDisabled,setIsDisabled ] = useState(false)
   const [ colorArr,setColorArr ] = useState([])
-
+  const [ point,setPoint ] = useState(0)
+  const [ resultGame,setResultGame] = useState(undefined)
+  let color;  
   const getRandCity = (arr) => {
     const randCity = arr[Math.round(Math.random() * (arr.length - 1))];
     if(randCitis.length < 5){
@@ -21,13 +23,19 @@ const Main = () => {
         return randCitis[randCitis.length-1]
       }
     }
-    else {
+    else { 
       setIsDisabled(true)
+      if(point >= 4){
+        setResultGame("You Win")
+      }
+      else{
+        setResultGame("You Lose")
+      }
       return randCitis[randCitis.length-1]
     }
   };
   const [city,setCity] = useState(()=>getRandCity(CONSTANTS.cities))
-  const checkAnswer = (userAnswer,rightAnswer) =>{
+  const checkAnswer = (userAnswer,rightAnswer) => {
     return Math.abs(rightAnswer - userAnswer) <= 4 ? true : false
   }
   const requestAnswer = (values) => {
@@ -38,13 +46,15 @@ const Main = () => {
         return res.json();
       })
       .then((data) => {  
-        if (checkAnswer(temperature,Math.round(data.main.temp))){
-          setColorArr([...colorArr,"green"])
+        const realTemp = Math.round(data.main.temp)
+        if (checkAnswer(temperature,realTemp)){
+          color = "green"
+          setPoint(point+1)
         } 
         else {
-          setColorArr([...colorArr,"red"])
-
+          color = "red"
         }
+        setColorArr([...colorArr,{color:color,realTemp:realTemp,temperature:temperature}])
         setCity(getRandCity(CONSTANTS.cities))
       })
       .catch((err) => {
@@ -54,8 +64,6 @@ const Main = () => {
         form.resetFields();
     });
   };
-  
-
   return (
     <div className="main_container">
       <div>
@@ -69,10 +77,15 @@ const Main = () => {
       </div>
       <div className="point-block">
       {
-        randCitis.map((city,i)=>{
-          return <Point key={i} city={city} color = {colorArr[i]} />
+        randCitis.map((city,i)=>{       
+          return <Point key={i} city={city} obj={colorArr[i]} />
         })
       }
+      </div>
+      <div>
+          {
+            isDisabled ?  <Typography.Title level={1}>{resultGame}</Typography.Title>:<></>
+          }
       </div>
     </div>
   );
