@@ -13,55 +13,63 @@ const Main = () => {
   const [isRestart, setIsRestart] = useState(false);
   const [city, setCity] = useState("");
   const getRandCity = (arr) => {
-    const randCity = arr[Math.round(Math.random() * (arr.length - 1))];
-    if (randCitis.length !== 5) {
-      if (!randCitis.includes(randCity)) {
-        setRandCitis([...randCitis, randCity]);
-        return randCity;
-      } else {
-        getRandCity(CONSTANTS.cities);
-        return randCitis[randCitis.length - 1];
-      }
-    } else {
+    if (randCitis.length >= 5) {
       setIsDisabled(true);
       return randCitis[randCitis.length - 1];
     }
+  
+    let randCity;
+    do {
+      randCity = arr[Math.floor(Math.random() * arr.length)];
+    } while (randCitis.includes(randCity));
+  
+    setRandCitis([...randCitis, randCity]);
+    return randCity;
   };
+  useEffect(() => {
+    setCity(getRandCity(CONSTANTS.cities));
+  }, [isRestart]);
+
   const checkAnswer = (userAnswer, rightAnswer) => {
     return Math.abs(rightAnswer - userAnswer) <= 4 ? true : false;
   };
 
   const requestAnswer = (values) => {
-    let color;
     const { temperature } = values;
     if (!temperature) {
       return;
     }
+  
     fetch(`${CONSTANTS.API_URL}${city}&appid=${CONSTANTS.API_KEY}&units=metric`)
       .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch data from API");
+        }
         return res.json();
       })
       .then((data) => {
         const realTemp = Math.round(data.main.temp);
-        if (checkAnswer(temperature, realTemp)) {
-          color = "green";
+        let color = checkAnswer(temperature, realTemp) ? "green" : "red";
+  
+        if (color === "green") {
           setPoint(point + 1);
-        } else {
-          color = "red";
         }
-        setPointInfo([
-          ...pointInfo,
-          { color: color, realTemp: realTemp, temperature: temperature },
+  
+        setPointInfo((prev) => [
+          ...prev,
+          { color, realTemp, temperature },
         ]);
         setCity(getRandCity(CONSTANTS.cities));
       })
       .catch((err) => {
-        console.log(err);
+        console.error(err);
+        alert("An error occurred while receiving the data. Please try again.");
       })
       .finally(() => {
         form.resetFields();
       });
   };
+  
   const restartGame = () => {
     setIsRestart(!isRestart);
     setRandCitis([]);
@@ -69,10 +77,6 @@ const Main = () => {
     setPoint(0);
     setIsDisabled(!isDisabled);
   };
-  // eslint-disable-next-line
-  useEffect(() => {
-    setCity(getRandCity(CONSTANTS.cities));
-  }, [isRestart]);
 
   useEffect(() => {
     if (point >= 4) {
